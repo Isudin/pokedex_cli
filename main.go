@@ -1,11 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func main() {
 	fmt.Println("Hello, World!")
 }
 
 func cleanInput(text string) []string {
-	return []string{}
+	return strings.Fields(text)
 }
