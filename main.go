@@ -28,6 +28,10 @@ func commandExit() error {
 	return nil
 }
 
+func commandHelp() error {
+	return nil
+}
+
 func cleanInput(text string) []string {
 	lowerString := strings.ToLower(text)
 	return strings.Fields(lowerString)
@@ -41,9 +45,9 @@ func getCommands() map[string]cliCommand {
 			callback:    commandExit,
 		},
 		"help": {
-			name:        "",
-			description: "",
-			callback:    nil,
+			name:        "help",
+			description: "Get some help",
+			callback:    commandHelp,
 		},
 	}
 }
