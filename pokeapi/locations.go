@@ -2,7 +2,6 @@ package pokeapi
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -33,12 +32,11 @@ func GetLocationAreas(url string) (LocationAreas, error) {
 		return LocationAreas{}, err
 	}
 
-	fmt.Printf("API: %v", res.Body)
-
 	return areas, nil
 }
 
 type LocationAreas struct {
+	Count    int            `json:"count"`
 	Next     *string        `json:"next"`
 	Previous *string        `json:"previous"`
 	Areas    []LocationArea `json:"results"`

@@ -5,13 +5,17 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/Isudin/pokedex_cli/pokeapi"
 )
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	scanner := bufio.NewScanner(reader)
 	commands := getCommands()
-	for true {
+	areas := &pokeapi.LocationAreas{}
+
+	for {
 		fmt.Print("Pokedex > ")
 		hasInput := scanner.Scan()
 		if !hasInput {
@@ -29,17 +33,25 @@ func main() {
 			continue
 		}
 
-		command.callback()
+		err := command.callback(areas)
+		if err != nil {
+			fmt.Printf("%v", err.Error())
+		}
 	}
 }
 
-func commandExit() error {
+func cleanInput(text string) []string {
+	lowerString := strings.ToLower(text)
+	return strings.Fields(lowerString)
+}
+
+func commandExit(_ *pokeapi.LocationAreas) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp() error {
+func commandHelp(_ *pokeapi.LocationAreas) error {
 	fmt.Print("Welcome to the Pokedex!\nUsage:\n\n")
 	for _, command := range getCommands() {
 		fmt.Printf("%v: %v\n", command.name, command.description)
@@ -47,9 +59,44 @@ func commandHelp() error {
 	return nil
 }
 
-func cleanInput(text string) []string {
-	lowerString := strings.ToLower(text)
-	return strings.Fields(lowerString)
+func commandMap(areas *pokeapi.LocationAreas) error {
+	return mapLocations(areas, true)
+}
+
+func commandMapb(areas *pokeapi.LocationAreas) error {
+	return mapLocations(areas, false)
+}
+
+func mapLocations(areas *pokeapi.LocationAreas, isNext bool) error {
+	url := ""
+
+	if areas.Count != 0 {
+		if isNext {
+			if areas.Next == nil {
+				fmt.Println("you're on the last page")
+				return nil
+			}
+			url = *areas.Next
+		} else {
+			if areas.Previous == nil {
+				fmt.Println("you're on the first page")
+				return nil
+			}
+			url = *areas.Previous
+		}
+	}
+
+	locationAreas, err := pokeapi.GetLocationAreas(url)
+	if err != nil {
+		return err
+	}
+
+	for _, locationArea := range locationAreas.Areas {
+		fmt.Println(locationArea.Name)
+	}
+
+	*areas = locationAreas
+	return nil
 }
 
 func getCommands() map[string]cliCommand {
@@ -64,11 +111,21 @@ func getCommands() map[string]cliCommand {
 			description: "Get some help",
 			callback:    commandHelp,
 		},
+		"map": {
+			name:        "map",
+			description: "Displaying names of the next 20 locations",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displaying names of the previous 20 locations",
+			callback:    commandMapb,
+		},
 	}
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*pokeapi.LocationAreas) error
 }
