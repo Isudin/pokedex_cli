@@ -10,6 +10,7 @@ import (
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	scanner := bufio.NewScanner(reader)
+	commands := getCommands()
 	for true {
 		fmt.Print("Pokedex > ")
 		hasInput := scanner.Scan()
@@ -17,8 +18,18 @@ func main() {
 			continue
 		}
 
-		//text := scanner.Text()
-		//command := cleanInput(text)
+		text := scanner.Text()
+		commandNames := cleanInput(text)
+		if len(commandNames) == 0 {
+			continue
+		}
+		command := commands[commandNames[0]]
+		if command.name == "" || command.callback == nil {
+			fmt.Println("Unknown command")
+			continue
+		}
+
+		command.callback()
 	}
 }
 
@@ -29,6 +40,10 @@ func commandExit() error {
 }
 
 func commandHelp() error {
+	fmt.Print("Welcome to the Pokedex!\nUsage:\n\n")
+	for _, command := range getCommands() {
+		fmt.Printf("%v: %v\n", command.name, command.description)
+	}
 	return nil
 }
 
