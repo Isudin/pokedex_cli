@@ -40,6 +40,11 @@ func getCommands() map[string]cliCommand {
 			description: "Exit the Pokedex",
 			callback:    commandExit,
 		},
+		"help": {
+			name:        "",
+			description: "",
+			callback:    nil,
+		},
 	}
 }
 
