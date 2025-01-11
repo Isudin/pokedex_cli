@@ -20,7 +20,7 @@ func TestCleanInput(t *testing.T) {
 		},
 		{
 			input:    "-- 12Test. aaa_$!",
-			expected: []string{"--", "12Test.", "aaa_$!"},
+			expected: []string{"--", "12test.", "aaa_$!"},
 		},
 	}
 
@@ -31,10 +31,32 @@ func TestCleanInput(t *testing.T) {
 		if len(output) != len(c.expected) {
 			t.Errorf("Error matching output\nExpected: [%v]\nOutput: [%v]", allExpected, allOutput)
 		}
+
 		for i := range output {
 			if output[i] != c.expected[i] {
 				t.Errorf("Error matching output\nExpected: [%v]\nOutput: [%v]", allExpected, allOutput)
 			}
+		}
+	}
+}
+
+func TestGetCommands(t *testing.T) {
+	commands := getCommands()
+	if len(commands) == 0 {
+		t.Errorf("No items in the returned map")
+	}
+
+	for _, command := range commands {
+		if command.name == "" {
+			t.Errorf("Empty command name")
+		}
+
+		if command.description == "" {
+			t.Errorf("Empty command description")
+		}
+
+		if command.callback == nil {
+			t.Errorf("Empty command callback function")
 		}
 	}
 }
