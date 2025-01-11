@@ -19,7 +19,7 @@ func main() {
 
 		text := scanner.Text()
 		command := cleanInput(text)
-		fmt.Println("Your command was:", command[0])
+
 	}
 }
 
