@@ -17,9 +17,8 @@ func main() {
 			continue
 		}
 
-		text := scanner.Text()
-		command := cleanInput(text)
-
+		//text := scanner.Text()
+		//command := cleanInput(text)
 	}
 }
 
