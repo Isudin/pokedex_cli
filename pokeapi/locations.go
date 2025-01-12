@@ -2,25 +2,21 @@ package pokeapi
 
 import (
 	"encoding/json"
-	"io"
-	"net/http"
 
 	"github.com/Isudin/pokedex_cli/internal/pokecache"
 )
 
-const apiUrl = "https://pokeapi.co/api/v2/"
-const locationAreaEndpoint = "location-area"
-const reqParams = "?offset=0&limit=20"
-
-var cache *pokecache.Cache = &pokecache.Cache{}
+var pagingParams = "?offset=0&limit=20"
+var cachedLocations = &pokecache.Cache{}
+var cachedPokemons = &pokecache.Cache{}
 
 func GetLocationAreas(url string) (LocationAreas, error) {
 	var areas LocationAreas
 	if url == "" {
-		url = apiUrl + locationAreaEndpoint + reqParams
+		url = apiUrl + locationAreaEndpoint + pagingParams
 	}
 
-	areas, err := GetAreasFromCache(url)
+	areas, err := GetLocationAreasFromCache(url)
 	if err != nil {
 		return LocationAreas{}, err
 	}
@@ -39,38 +35,61 @@ func GetLocationAreas(url string) (LocationAreas, error) {
 		return LocationAreas{}, err
 	}
 
-	cache.Add(url, body)
+	cachedLocations.Add(url, body)
 	return areas, nil
 }
 
-func Get(url string) ([]byte, error) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	client := http.DefaultClient
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	return io.ReadAll(res.Body)
-}
-
-func GetAreasFromCache(url string) (LocationAreas, error) {
+func GetLocationAreasFromCache(url string) (LocationAreas, error) {
 	var areas LocationAreas
-	if !cache.Inniciated {
+	if !cachedLocations.Inniciated {
 		newCache, err := pokecache.NewCache(pokecache.MinDuration)
-		cache = newCache
+		cachedLocations = newCache
 		return LocationAreas{}, err
-	} else if data, isCached := cache.Get(url); isCached {
+	} else if data, isCached := cachedLocations.Get(url); isCached {
 		err := json.Unmarshal(data, &areas)
 		return areas, err
 	}
 
 	return LocationAreas{}, nil
+}
+
+func GetPokemonsByArea(areaName string) ([]Pokemon, error) {
+	pokemons, err := GetPokemonsByAreaFromCache(areaName)
+	if err != nil {
+		return nil, err
+	}
+
+	if pokemons != nil {
+		return pokemons, nil
+	}
+
+	url := apiUrl + locationAreaEndpoint + "/" + areaName
+	data, err := Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	var area LocationArea
+	err = json.Unmarshal(data, &area)
+	if err != nil {
+		return nil, err
+	}
+
+	return area.Pokemons, nil
+}
+
+func GetPokemonsByAreaFromCache(areaName string) ([]Pokemon, error) {
+	var area LocationArea
+	if !cachedPokemons.Inniciated {
+		newCache, err := pokecache.NewCache(pokecache.MinDuration)
+		cachedPokemons = newCache
+		return nil, err
+	} else if data, isCached := cachedPokemons.Get(areaName); isCached {
+		err := json.Unmarshal(data, &area)
+		return area.Pokemons, err
+	}
+
+	return nil, nil
 }
 
 type LocationAreas struct {
@@ -81,5 +100,10 @@ type LocationAreas struct {
 }
 
 type LocationArea struct {
+	Name     string    `json:"name"`
+	Pokemons []Pokemon `json:"pokemon_encounters"`
+}
+
+type Pokemon struct {
 	Name string `json:"name"`
 }
