@@ -37,11 +37,15 @@ func NewCache(interval time.Duration) (*Cache, error) {
 }
 
 func (c *Cache) Add(key string, val []byte) {
+	c.Mut.Lock()
 	c.Entries[key] = cacheEntry{val: val, createdAt: time.Now()}
+	c.Mut.Unlock()
 }
 
 func (c *Cache) Get(key string) ([]byte, bool) {
+	c.Mut.Lock()
 	entry, isErr := c.Entries[key]
+	c.Mut.Unlock()
 	return entry.val, isErr
 }
 
