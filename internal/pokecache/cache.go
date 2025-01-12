@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -18,16 +19,25 @@ type cacheEntry struct {
 	val       []byte
 }
 
-func NewCache(interval time.Duration) (cache Cache, err error) {
+func NewCache(interval time.Duration) (*Cache, error) {
+	if interval < minDuration {
+		return &Cache{}, fmt.Errorf("interval (%v) cannot be lower than %v", interval, minDuration)
+	}
 
-	return
+	cache := Cache{
+		Entries:     make(map[string]cacheEntry),
+		Mut:         sync.Mutex{},
+		maxDuration: interval,
+	}
+
+	return &cache, nil
 }
 
 func (c *Cache) Add(key string, val []byte) {
-
+	c.Entries[key] = cacheEntry{val: val, createdAt: time.Now()}
 }
 
 func (c *Cache) Get(key string) ([]byte, bool) {
-
-	return nil, false
+	entry, isErr := c.Entries[key]
+	return entry.val, isErr
 }
