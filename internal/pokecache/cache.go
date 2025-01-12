@@ -5,8 +5,10 @@ import (
 	"time"
 )
 
+const minDuration = 30 * time.Second
+
 type Cache struct {
-	Entry       map[string]cacheEntry
+	Entries     map[string]cacheEntry
 	Mut         sync.Mutex
 	maxDuration time.Duration
 }
@@ -16,7 +18,7 @@ type cacheEntry struct {
 	val       []byte
 }
 
-func NewCache(interval time.Duration) (cache Cache) {
+func NewCache(interval time.Duration) (cache Cache, err error) {
 
 	return
 }
