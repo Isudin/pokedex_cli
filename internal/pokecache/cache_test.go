@@ -24,9 +24,13 @@ func TestNewCache(t *testing.T) {
 			continue
 		}
 
-		if minDuration < c.time {
+		if c.isErr {
+			continue
+		}
+
+		if minDuration > c.time {
 			t.Errorf(`interval (%v) should not be less than minDuration (%v), 
-					  yet error has not been thrown`, c, minDuration)
+					  yet error has not been thrown`, c.time, minDuration)
 			continue
 		}
 
