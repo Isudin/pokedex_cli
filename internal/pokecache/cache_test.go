@@ -12,8 +12,8 @@ func TestNewCache(t *testing.T) {
 		isErr bool
 	}{
 		{time.Duration(-1), true},
-		{time.Minute, false},
-		{time.Nanosecond, true},
+		{time.Minute, time.Minute >= minDuration},
+		{time.Nanosecond, time.Nanosecond >= minDuration},
 	}
 
 	for i, c := range cases {
