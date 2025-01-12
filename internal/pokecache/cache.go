@@ -1,4 +1,4 @@
-package cache
+package pokecache
 
 import (
 	"fmt"
@@ -6,12 +6,13 @@ import (
 	"time"
 )
 
-const minDuration = 5 * time.Second
+const MinDuration = 30 * time.Second
 const tickDuration = 1 * time.Second
 
 type Cache struct {
 	Entries     map[string]cacheEntry
 	Mut         sync.Mutex
+	Inniciated  bool
 	maxDuration time.Duration
 }
 
@@ -21,14 +22,15 @@ type cacheEntry struct {
 }
 
 func NewCache(interval time.Duration) (*Cache, error) {
-	if interval < minDuration {
-		return &Cache{}, fmt.Errorf("interval (%v) cannot be lower than %v", interval, minDuration)
+	if interval < MinDuration {
+		return &Cache{}, fmt.Errorf("interval (%v) cannot be lower than %v", interval, MinDuration)
 	}
 
 	cache := Cache{
 		Entries:     make(map[string]cacheEntry),
 		Mut:         sync.Mutex{},
 		maxDuration: interval,
+		Inniciated:  true,
 	}
 
 	go cache.reapLoop()
@@ -37,6 +39,7 @@ func NewCache(interval time.Duration) (*Cache, error) {
 }
 
 func (c *Cache) Add(key string, val []byte) {
+	fmt.Println("---SAVING TO CACHE---")
 	c.Mut.Lock()
 	c.Entries[key] = cacheEntry{val: val, createdAt: time.Now()}
 	c.Mut.Unlock()

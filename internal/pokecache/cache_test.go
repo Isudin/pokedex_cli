@@ -1,4 +1,4 @@
-package cache
+package pokecache
 
 import (
 	"sync"
@@ -12,9 +12,9 @@ func TestNewCache(t *testing.T) {
 		isErr bool
 	}{
 		{time.Duration(-1), true},
-		{time.Minute, time.Minute < minDuration},
-		{time.Second * 5, time.Second*5 < minDuration},
-		{time.Nanosecond, time.Nanosecond < minDuration},
+		{time.Minute, time.Minute < MinDuration},
+		{time.Second * 5, time.Second*5 < MinDuration},
+		{time.Nanosecond, time.Nanosecond < MinDuration},
 	}
 
 	for i, c := range cases {
@@ -29,9 +29,9 @@ func TestNewCache(t *testing.T) {
 			continue
 		}
 
-		if minDuration > c.time {
+		if MinDuration > c.time {
 			t.Errorf(`interval (%v) should not be less than minDuration (%v), 
-					  yet error has not been thrown`, c.time, minDuration)
+					  yet error has not been thrown`, c.time, MinDuration)
 			continue
 		}
 
