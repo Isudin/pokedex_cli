@@ -7,22 +7,30 @@ import (
 )
 
 func TestNewCache(t *testing.T) {
-	cases := []time.Duration{
-		time.Duration(-1),
-		time.Minute,
-		time.Nanosecond,
+	cases := []struct {
+		time  time.Duration
+		isErr bool
+	}{
+		{time.Duration(-1), true},
+		{time.Minute, false},
+		{time.Nanosecond, true},
 	}
 
-	for _, c := range cases {
-		cache, err := NewCache(c)
+	for i, c := range cases {
+		cache, err := NewCache(c.time)
 
-		if minDuration < c && err == nil {
+		if (err != nil) != c.isErr {
+			t.Errorf("Error expected for given time %v. Testing case: %v", c.time, i)
+			continue
+		}
+
+		if minDuration < c.time {
 			t.Errorf(`interval (%v) should not be less than minDuration (%v), 
 					  yet error has not been thrown`, c, minDuration)
 			continue
 		}
 
-		if cache.maxDuration != c {
+		if cache.maxDuration != c.time {
 			t.Errorf("maxDuration (%v) doesn't match given interval (%v)", cache.maxDuration, c)
 			continue
 		}
