@@ -52,21 +52,17 @@ func (c *Cache) Get(key string) ([]byte, bool) {
 func (c *Cache) reapLoop() {
 	ticker := time.NewTicker(tickDuration)
 	defer ticker.Stop()
-	fmt.Println("Starting loop")
 
 	for {
-		fmt.Println("Waiting for first tick")
 		time := <-ticker.C
-		fmt.Printf("Tick acquired: %v", time)
+		c.Mut.Lock()
 		for key, entry := range c.Entries {
 			timeToClose := entry.createdAt.Add(c.maxDuration)
 			if timeToClose.Compare(time) < 1 {
-				c.Mut.Lock()
 				delete(c.Entries, key)
-				c.Mut.Unlock()
 			}
 		}
-		fmt.Println("Resetting ticker")
+		c.Mut.Unlock()
 		ticker.Reset(tickDuration)
 	}
 }
