@@ -75,6 +75,7 @@ func GetPokemonByArea(areaName string) ([]Pokemon, error) {
 		return nil, err
 	}
 
+	cachedPokemon.Add(areaName, data)
 	return getPokemonFromEncounters(area.PokemonEncounters), nil
 }
 
