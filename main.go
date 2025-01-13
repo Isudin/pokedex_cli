@@ -23,19 +23,24 @@ func main() {
 		}
 
 		text := scanner.Text()
-		commandNames := cleanInput(text)
-		if len(commandNames) == 0 {
+		commandWords := cleanInput(text)
+		if len(commandWords) == 0 {
 			continue
 		}
-		command := commands[commandNames[0]]
+		command := commands[commandWords[0]]
 		if command.name == "" || command.callback == nil {
 			fmt.Println("Unknown command")
 			continue
 		}
 
-		err := command.callback(areas)
+		var params []string
+		if len(commandWords) > 1 {
+			params = commandWords[1:]
+		}
+
+		err := command.callback(areas, params)
 		if err != nil {
-			fmt.Printf("%v", err.Error())
+			fmt.Printf("%v\n", err.Error())
 		}
 	}
 }
@@ -45,13 +50,13 @@ func cleanInput(text string) []string {
 	return strings.Fields(lowerString)
 }
 
-func commandExit(_ *pokeapi.LocationAreas) error {
+func commandExit(_ *pokeapi.LocationAreas, _ []string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(_ *pokeapi.LocationAreas) error {
+func commandHelp(_ *pokeapi.LocationAreas, _ []string) error {
 	fmt.Print("Welcome to the Pokedex!\nUsage:\n\n")
 	for _, command := range getCommands() {
 		fmt.Printf("%v: %v\n", command.name, command.description)
@@ -59,11 +64,11 @@ func commandHelp(_ *pokeapi.LocationAreas) error {
 	return nil
 }
 
-func commandMap(areas *pokeapi.LocationAreas) error {
+func commandMap(areas *pokeapi.LocationAreas, _ []string) error {
 	return mapLocations(areas, true)
 }
 
-func commandMapb(areas *pokeapi.LocationAreas) error {
+func commandMapb(areas *pokeapi.LocationAreas, _ []string) error {
 	return mapLocations(areas, false)
 }
 
@@ -99,6 +104,30 @@ func mapLocations(areas *pokeapi.LocationAreas, isNext bool) error {
 	return nil
 }
 
+func commandExplore(_ *pokeapi.LocationAreas, parameters []string) error {
+	if parameters == nil {
+		return fmt.Errorf("no parameters found")
+	}
+
+	area := parameters[0]
+	fmt.Printf("Exploring area %v...\n", area)
+	pokemon, err := pokeapi.GetPokemonByArea(area)
+	if err != nil {
+		return nil
+	}
+
+	if len(pokemon) == 0 {
+		fmt.Println("No Pokemon found in this location")
+	} else {
+		fmt.Println("Found Pokemon:")
+		for _, pok := range pokemon {
+			fmt.Printf(" - %v\n", pok.Name)
+		}
+	}
+
+	return nil
+}
+
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
 		"exit": {
@@ -121,11 +150,16 @@ func getCommands() map[string]cliCommand {
 			description: "Displaying names of the previous 20 locations",
 			callback:    commandMapb,
 		},
+		"explore": {
+			name:        "explore",
+			description: "List all pokemons found in the area",
+			callback:    commandExplore,
+		},
 	}
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*pokeapi.LocationAreas) error
+	callback    func(*pokeapi.LocationAreas, []string) error
 }
