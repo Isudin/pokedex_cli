@@ -7,6 +7,7 @@ import (
 
 const apiUrl = "https://pokeapi.co/api/v2/"
 const locationAreaEndpoint = "location-area"
+const pokemonEndpoint = "pokemon"
 
 func Get(url string) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
