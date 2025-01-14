@@ -6,6 +6,8 @@ import (
 	"github.com/Isudin/pokedex_cli/internal/pokecache"
 )
 
+var cachedEncounters = &pokecache.Cache{}
+
 func GetPokemonByArea(areaName string) ([]Pokemon, error) {
 	pokemon, err := getPokemonByAreaFromCache(areaName)
 	if err != nil {
@@ -28,17 +30,17 @@ func GetPokemonByArea(areaName string) ([]Pokemon, error) {
 		return nil, err
 	}
 
-	cachedPokemon.Add(areaName, data)
+	cachedEncounters.Add(areaName, data)
 	return getPokemonFromEncounters(area.PokemonEncounters), nil
 }
 
 func getPokemonByAreaFromCache(areaName string) ([]Pokemon, error) {
 	var area LocationArea
-	if !cachedPokemon.Inniciated {
+	if !cachedEncounters.Innitiated {
 		newCache, err := pokecache.NewCache(pokecache.MinDuration)
-		cachedPokemon = newCache
+		cachedEncounters = newCache
 		return nil, err
-	} else if data, isCached := cachedPokemon.Get(areaName); isCached {
+	} else if data, isCached := cachedEncounters.Get(areaName); isCached {
 		err := json.Unmarshal(data, &area)
 		return getPokemonFromEncounters(area.PokemonEncounters), err
 	}

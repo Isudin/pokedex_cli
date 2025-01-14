@@ -12,7 +12,7 @@ const tickDuration = 1 * time.Second
 type Cache struct {
 	Entries     map[string]cacheEntry
 	Mut         sync.Mutex
-	Inniciated  bool
+	Innitiated  bool
 	maxDuration time.Duration
 }
 
@@ -30,7 +30,7 @@ func NewCache(interval time.Duration) (*Cache, error) {
 		Entries:     make(map[string]cacheEntry),
 		Mut:         sync.Mutex{},
 		maxDuration: interval,
-		Inniciated:  true,
+		Innitiated:  true,
 	}
 
 	go cache.reapLoop()

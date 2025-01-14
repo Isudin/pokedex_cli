@@ -8,7 +8,6 @@ import (
 
 var pagingParams = "?offset=0&limit=20"
 var cachedLocations = &pokecache.Cache{}
-var cachedPokemon = &pokecache.Cache{}
 
 func GetLocationAreas(url string) (LocationAreas, error) {
 	var areas LocationAreas
@@ -41,7 +40,7 @@ func GetLocationAreas(url string) (LocationAreas, error) {
 
 func getLocationAreasFromCache(url string) (LocationAreas, error) {
 	var areas LocationAreas
-	if !cachedLocations.Inniciated {
+	if !cachedLocations.Innitiated {
 		newCache, err := pokecache.NewCache(pokecache.MinDuration)
 		cachedLocations = newCache
 		return LocationAreas{}, err
