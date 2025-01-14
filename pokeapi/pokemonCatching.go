@@ -1,14 +1,15 @@
 package pokeapi
 
 import (
+	"encoding/json"
+
 	"github.com/Isudin/pokedex_cli/internal/pokecache"
 )
 
 var cachedPokemon = &pokecache.Cache{}
 
 func GetPokemonByName(name string) (Pokemon, error) {
-	//Try get pokemon from cache
-	pokemon, err := getPokemonFromCache()
+	pokemon, err := getPokemonFromCache(name)
 	if err != nil {
 		return Pokemon{}, err
 	}
@@ -17,20 +18,33 @@ func GetPokemonByName(name string) (Pokemon, error) {
 		return pokemon, nil
 	}
 
-	//Prepare URL
+	url := apiUrl + pokemonEndpoint + "/" + name
 
-	//Do Get request from API
-	// Get()
+	data, err := Get(url)
+	if err != nil {
+		return Pokemon{}, err
+	}
 
-	//Unmarshal data
+	var pok Pokemon
+	err = json.Unmarshal(data, &pok)
+	if err != nil {
+		return Pokemon{}, err
+	}
 
-	//Save data to cache
-
-	//return pokemon
-
+	cachedPokemon.Add(name, data)
 	return Pokemon{}, nil
 }
 
 func getPokemonFromCache(name string) (Pokemon, error) {
+	var pokemon Pokemon
+	if !cachedPokemon.Innitiated {
+		newCache, err := pokecache.NewCache(pokecache.MinDuration)
+		cachedPokemon = newCache
+		return Pokemon{}, err
+	} else if data, isCached := cachedPokemon.Get(name); isCached {
+		err := json.Unmarshal(data, &pokemon)
+		return pokemon, err
+	}
+
 	return Pokemon{}, nil
 }
