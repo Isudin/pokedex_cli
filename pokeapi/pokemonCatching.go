@@ -32,7 +32,7 @@ func GetPokemonByName(name string) (Pokemon, error) {
 	}
 
 	cachedPokemon.Add(name, data)
-	return Pokemon{}, nil
+	return pok, nil
 }
 
 func getPokemonFromCache(name string) (Pokemon, error) {

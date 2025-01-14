@@ -9,6 +9,8 @@ import (
 	"github.com/Isudin/pokedex_cli/pokeapi"
 )
 
+var pokedex = map[string]pokeapi.Pokemon{}
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	scanner := bufio.NewScanner(reader)

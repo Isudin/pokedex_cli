@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 
 	"github.com/Isudin/pokedex_cli/pokeapi"
@@ -70,7 +71,7 @@ func commandExplore(_ *pokeapi.LocationAreas, parameters []string) error {
 	fmt.Printf("Exploring area %v...\n", area)
 	pokemon, err := pokeapi.GetPokemonByArea(area)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if len(pokemon) == 0 {
@@ -80,6 +81,28 @@ func commandExplore(_ *pokeapi.LocationAreas, parameters []string) error {
 		for _, pok := range pokemon {
 			fmt.Printf(" - %v\n", pok.Name)
 		}
+	}
+
+	return nil
+}
+
+func commandCatch(_ *pokeapi.LocationAreas, parameters []string) error {
+	if parameters == nil {
+		return fmt.Errorf("no parameters found")
+	}
+
+	name := parameters[0]
+	pokemon, err := pokeapi.GetPokemonByName(name)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Throwing a Pokeball at " + pokemon.Name + "...")
+	if rand.Float64() <= 0.2 {
+		fmt.Println(pokemon.Name + " caught!")
+		pokedex[pokemon.Name] = pokemon
+	} else {
+		fmt.Println(pokemon.Name + " has escaped!")
 	}
 
 	return nil
@@ -111,6 +134,11 @@ func getCommands() map[string]cliCommand {
 			name:        "explore",
 			description: "List all pokemons found in the area",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Try to catch a pokemon",
+			callback:    commandCatch,
 		},
 	}
 }
