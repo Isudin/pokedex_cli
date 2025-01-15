@@ -108,6 +108,34 @@ func commandCatch(_ *pokeapi.LocationAreas, parameters []string) error {
 	return nil
 }
 
+func commandInspect(_ *pokeapi.LocationAreas, parameters []string) error {
+	if parameters == nil {
+		return fmt.Errorf("no parameters found")
+	}
+
+	name := parameters[0]
+	pokemon, exists := pokedex[name]
+	if !exists {
+		fmt.Println("you have not caught that pokemon")
+		return nil
+	}
+
+	fmt.Printf("Name: %v\n", pokemon.Name)
+	fmt.Printf("Height: %v\n", pokemon.Height)
+	fmt.Printf("Weight: %v\n", pokemon.Weight)
+	fmt.Printf("Stats: \n")
+	for _, stat := range pokemon.Stats {
+		fmt.Printf("-%v: %v\n", stat.StatNameObj.Name, stat.Value)
+	}
+
+	fmt.Printf("Types: \n")
+	for _, pokeType := range pokemon.Types {
+		fmt.Printf("- %v\n", pokeType.PokemonType.Name)
+	}
+
+	return nil
+}
+
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
 		"exit": {
@@ -139,6 +167,11 @@ func getCommands() map[string]cliCommand {
 			name:        "catch",
 			description: "Try to catch a pokemon",
 			callback:    commandCatch,
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspect caught pokemon",
+			callback:    commandInspect,
 		},
 	}
 }
