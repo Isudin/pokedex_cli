@@ -136,6 +136,20 @@ func commandInspect(_ *pokeapi.LocationAreas, parameters []string) error {
 	return nil
 }
 
+func commandPokedex(_ *pokeapi.LocationAreas, _ []string) error {
+	if len(pokedex) == 0 {
+		fmt.Println("Your pokedex is empty")
+		return nil
+	}
+
+	fmt.Println("Your pokedex:")
+	for _, pok := range pokedex {
+		fmt.Println("- " + pok.Name)
+	}
+
+	return nil
+}
+
 func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
 		"exit": {
@@ -172,6 +186,11 @@ func getCommands() map[string]cliCommand {
 			name:        "inspect",
 			description: "Inspect caught pokemon",
 			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "List all of pokemon you've caught",
+			callback:    commandPokedex,
 		},
 	}
 }
